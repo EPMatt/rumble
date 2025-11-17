@@ -91,12 +91,11 @@ public class LetClauseSparkIterator extends RuntimeTupleIterator {
     @Override
     public void open(DynamicContext context) {
         super.open(context);
+        this.tupleContext = new DynamicContext(this.currentDynamicContext); // assign current context as parent
         if (this.child == null || this.evaluationDepthLimit == 0) {
-            this.tupleContext = this.currentDynamicContext;
             this.nextLocalTupleResult = generateTupleFromExpressionWithContext(null);
         } else {
             this.child.open(this.currentDynamicContext);
-            this.tupleContext = new DynamicContext(this.currentDynamicContext); // assign current context as parent
             setNextLocalTupleResult();
         }
     }
@@ -104,12 +103,11 @@ public class LetClauseSparkIterator extends RuntimeTupleIterator {
     @Override
     public void reset(DynamicContext context) {
         super.reset(context);
+        this.tupleContext = new DynamicContext(this.currentDynamicContext); // assign current context as parent
         if (this.child == null || this.evaluationDepthLimit == 0) {
-            this.tupleContext = this.currentDynamicContext;
             this.nextLocalTupleResult = generateTupleFromExpressionWithContext(null);
         } else {
             this.child.reset(this.currentDynamicContext);
-            this.tupleContext = new DynamicContext(this.currentDynamicContext); // assign current context as parent
             setNextLocalTupleResult();
         }
     }
@@ -144,11 +142,11 @@ public class LetClauseSparkIterator extends RuntimeTupleIterator {
         }
         if (this.assignmentIterator.isDataFrame()) {
             JSoundDataFrame df = this.assignmentIterator.getDataFrame(this.tupleContext);
-            this.tupleContext = new DynamicContext(this.currentDynamicContext);
+            this.tupleContext = new DynamicContext(this.currentDynamicContext); 
             resultTuple.putValue(this.variableName, df);
         } else if (this.assignmentIterator.isRDDOrDataFrame()) {
             JavaRDD<Item> itemRDD = this.assignmentIterator.getRDD(this.tupleContext);
-            this.tupleContext = new DynamicContext(this.currentDynamicContext);
+            this.tupleContext = new DynamicContext(this.currentDynamicContext); 
             resultTuple.putValue(this.variableName, itemRDD);
         } else {
             List<Item> results = new ArrayList<>();
