@@ -240,11 +240,9 @@ import java.util.stream.Collectors;
 public class RuntimeIteratorVisitor extends AbstractNodeVisitor<RuntimeIterator> {
 
     private VisitorConfig visitorConfig;
-    private RumbleRuntimeConfiguration config;
 
-    public RuntimeIteratorVisitor(RumbleRuntimeConfiguration config) {
+    public RuntimeIteratorVisitor() {
         this.visitorConfig = VisitorConfig.runtimeIteratorVisitorConfig;
-        this.config = config;
     }
 
     @Override
@@ -308,7 +306,7 @@ public class RuntimeIteratorVisitor extends AbstractNodeVisitor<RuntimeIterator>
                 ),
                 expression.isUpdating(),
                 new RuntimeStaticContext(
-                        this.config,
+                        returnClause.getStaticContext().getRumbleConfiguration(),
                         expression.getStaticSequenceType(),
                         returnClause.getHighestExecutionMode(this.visitorConfig),
                         returnClause.getMetadata()
@@ -1123,7 +1121,7 @@ public class RuntimeIteratorVisitor extends AbstractNodeVisitor<RuntimeIterator>
                 // all builtin functions static-context-dependent.
                 // This might be worth a more fine-grained adjustment later.
                 expression.getStaticContext(),
-                this.config,
+                expression.getStaticContext().getRumbleConfiguration(),
                 expression.getHighestExecutionMode(this.visitorConfig),
                 iteratorMetadata
             );
@@ -1856,7 +1854,7 @@ public class RuntimeIteratorVisitor extends AbstractNodeVisitor<RuntimeIterator>
                     argument
                 ),
                 new RuntimeStaticContext(
-                        this.config,
+                        returnClause.getStaticContext().getRumbleConfiguration(),
                         statement.getStaticSequenceType(),
                         returnClause.getHighestExecutionMode(this.visitorConfig),
                         returnClause.getMetadata()
@@ -1896,7 +1894,7 @@ public class RuntimeIteratorVisitor extends AbstractNodeVisitor<RuntimeIterator>
                 axisIterator,
                 nodeTest,
                 new RuntimeStaticContext(
-                        this.config,
+                        stepExpr.getStaticContext().getRumbleConfiguration(),
                         SequenceType.ITEM,
                         stepExpr.getHighestExecutionMode(this.visitorConfig),
                         stepExpr.getMetadata()
@@ -1908,7 +1906,7 @@ public class RuntimeIteratorVisitor extends AbstractNodeVisitor<RuntimeIterator>
         return stepExpr.accept(
             new AxisIteratorVisitor(),
             new RuntimeStaticContext(
-                    this.config,
+                    stepExpr.getStaticContext().getRumbleConfiguration(),
                     SequenceType.STRING,
                     ExecutionMode.LOCAL,
                     metadata
