@@ -63,6 +63,7 @@ import org.rumbledb.expressions.miscellaneous.StringConcatExpression;
 import org.rumbledb.expressions.module.FunctionDeclaration;
 import org.rumbledb.expressions.module.LibraryModule;
 import org.rumbledb.expressions.module.MainModule;
+import org.rumbledb.expressions.module.OptionDeclaration;
 import org.rumbledb.expressions.module.Prolog;
 import org.rumbledb.expressions.module.TypeDeclaration;
 import org.rumbledb.expressions.module.VariableDeclaration;
@@ -170,8 +171,6 @@ import static org.rumbledb.types.SequenceType.ITEM_STAR;
  * @author Stefan Irimescu, Can Berker Cikis, Ghislain Fourny, Andrea Rinaldi
  */
 public class XQueryTranslationVisitor extends XQueryParserBaseVisitor<Node> {
-
-    private static final String SERIALIZATION_NAMESPACE = "http://www.w3.org/2010/xslt-xquery-serialization";
 
     private StaticContext moduleContext;
     private RumbleRuntimeConfiguration configuration;
@@ -334,6 +333,7 @@ public class XQueryTranslationVisitor extends XQueryParserBaseVisitor<Node> {
             );
         }
         List<LibraryModule> libraryModules = new ArrayList<>();
+        List<OptionDeclaration> optionDeclarations = new ArrayList<>();
         Set<String> namespaces = new HashSet<>();
         for (XQueryParser.ModuleImportContext namespace : ctx.moduleImport()) {
             LibraryModule libraryModule = this.processModuleImport(namespace);
@@ -400,7 +400,9 @@ public class XQueryTranslationVisitor extends XQueryParserBaseVisitor<Node> {
                     new FunctionDeclaration(inlineFunctionExpression, createMetadataFromContext(ctx))
                 );
             } else if (annotatedDeclaration.optionDecl() != null) {
-                this.processOptionDecl(annotatedDeclaration.optionDecl());
+                optionDeclarations.add(
+                    this.processOptionDecl(annotatedDeclaration.optionDecl())
+                );
             }
         }
         for (XQueryParser.ModuleImportContext module : ctx.moduleImport()) {
@@ -415,6 +417,9 @@ public class XQueryTranslationVisitor extends XQueryParserBaseVisitor<Node> {
         );
         for (LibraryModule libraryModule : libraryModules) {
             prolog.addImportedModule(libraryModule);
+        }
+        for (OptionDeclaration optionDeclaration : optionDeclarations) {
+            prolog.addDeclaration(optionDeclaration);
         }
         return prolog;
     }
@@ -2878,30 +2883,10 @@ public class XQueryTranslationVisitor extends XQueryParserBaseVisitor<Node> {
         return unescapeStringLiteral(rawValue.substring(1, rawValue.length() - 1));
     }
 
-    private void processOptionDecl(XQueryParser.OptionDeclContext ctx) {
+    private OptionDeclaration processOptionDecl(XQueryParser.OptionDeclContext ctx) {
         Name optionName = parseName(ctx.name, false, false, false);
         String optionValue = processStringLiteral(ctx.value);
-        if (SERIALIZATION_NAMESPACE.equals(optionName.getNamespace())) {
-            // XQuery 3.1 §4.19.3: "Serialization option declarations use the namespace URI
-            // http://www.w3.org/2010/xslt-xquery-serialization."
-            String localName = optionName.getLocalName();
-            if (localName == null || localName.isEmpty()) {
-                throw new ParsingException(
-                        "Serialization option name must have a local part.",
-                        createMetadataFromContext(ctx)
-                );
-            }
-            this.moduleContext.overrideSerializationParameter(localName, optionValue);
-            return;
-        }
-        throw new UnsupportedFeatureException(
-                "Only serialization option declarations are supported at the moment ("
-                    + optionName
-                    + " = "
-                    + optionValue
-                    + ").",
-                createMetadataFromContext(ctx)
-        );
+        return new OptionDeclaration(optionName, optionValue, createMetadataFromContext(ctx));
     }
 
     private void processEmptySequenceOrder(EmptyOrderDeclContext ctx) {
