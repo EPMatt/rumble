@@ -52,11 +52,9 @@ public class NamedFunctions implements Serializable, KryoSerializable {
     // static analysis phase
     // but functions items are fully known at runtimeIterator generation
     private HashMap<FunctionIdentifier, FunctionItem> userDefinedFunctions;
-    private RumbleRuntimeConfiguration conf;
 
-    public NamedFunctions(RumbleRuntimeConfiguration conf) {
+    public NamedFunctions() {
         this.userDefinedFunctions = new HashMap<>();
-        this.conf = conf;
     }
 
     public void clearUserDefinedFunctions() {
@@ -64,6 +62,7 @@ public class NamedFunctions implements Serializable, KryoSerializable {
     }
 
     public RuntimeIterator getUserDefinedFunctionCallIterator(
+            RuntimeStaticContext runtimeStaticContext,
             FunctionIdentifier identifier,
             ExecutionMode executionMode,
             ExceptionMetadata metadata,
@@ -72,7 +71,7 @@ public class NamedFunctions implements Serializable, KryoSerializable {
         if (checkUserDefinedFunctionExists(identifier)) {
             return buildUserDefinedFunctionCallIterator(
                 getUserDefinedFunction(identifier),
-                this.conf,
+                runtimeStaticContext,
                 executionMode,
                 metadata,
                 arguments
@@ -84,16 +83,21 @@ public class NamedFunctions implements Serializable, KryoSerializable {
 
     public static RuntimeIterator buildUserDefinedFunctionCallIterator(
             Item functionItem,
-            RumbleRuntimeConfiguration conf,
+            RuntimeStaticContext runtimeStaticContext,
             ExecutionMode executionMode,
             ExceptionMetadata metadata,
             List<RuntimeIterator> arguments
     ) {
         SequenceType sequenceType = functionItem.getSignature().getReturnType();
         SequenceType innerSequenceType = functionItem.getBodyIterator().getStaticType();
-        RuntimeStaticContext staticContext = new RuntimeStaticContext(conf, sequenceType, executionMode, metadata);
+        RuntimeStaticContext staticContext = new RuntimeStaticContext(
+                runtimeStaticContext,
+                sequenceType,
+                executionMode,
+                metadata
+        );
         RuntimeStaticContext innerStaticContext = new RuntimeStaticContext(
-                conf,
+                runtimeStaticContext,
                 innerSequenceType,
                 executionMode,
                 metadata
@@ -177,7 +181,7 @@ public class NamedFunctions implements Serializable, KryoSerializable {
             if (!builtinFunction.getSignature().getParameterTypes().get(i).equals(SequenceType.ITEM_STAR)) {
                 SequenceType sequenceType = builtinFunction.getSignature().getParameterTypes().get(i);
                 RuntimeStaticContext runtimeStaticContext = new RuntimeStaticContext(
-                        conf,
+                        staticContext,
                         sequenceType,
                         arguments.get(i).getHighestExecutionMode(),
                         arguments.get(i).getMetadata()
@@ -215,7 +219,7 @@ public class NamedFunctions implements Serializable, KryoSerializable {
             functionCallIterator = constructor.newInstance(
                 arguments,
                 new RuntimeStaticContext(
-                        conf,
+                        staticContext,
                         builtinFunction.getSignature().getReturnType(),
                         executionMode,
                         metadata
@@ -234,7 +238,7 @@ public class NamedFunctions implements Serializable, KryoSerializable {
             functionCallIterator.setStaticContext(staticContext);
             SequenceType sequenceType = builtinFunction.getSignature().getReturnType();
             RuntimeStaticContext runtimeStaticContext = new RuntimeStaticContext(
-                    conf,
+                    staticContext,
                     sequenceType,
                     functionCallIterator.getHighestExecutionMode(),
                     functionCallIterator.getMetadata()

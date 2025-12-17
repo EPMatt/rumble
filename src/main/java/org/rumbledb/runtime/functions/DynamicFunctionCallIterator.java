@@ -171,7 +171,7 @@ public class DynamicFunctionCallIterator extends HybridRuntimeIterator {
         }
         this.functionCallIterator = NamedFunctions.buildUserDefinedFunctionCallIterator(
             this.functionItem,
-            getConfiguration(),
+            getRuntimeStaticContext(),
             this.isPartialApplication
                 ? ExecutionMode.LOCAL
                 : this.functionItem.getBodyIterator().getHighestExecutionMode(),

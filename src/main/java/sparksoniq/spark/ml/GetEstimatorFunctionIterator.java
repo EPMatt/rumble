@@ -111,7 +111,7 @@ public class GetEstimatorFunctionIterator extends AtMostOneItemLocalRuntimeItera
                     estimatorShortName,
                     estimator,
                     new RuntimeStaticContext(
-                            getConfiguration(),
+                            getRuntimeStaticContext(),
                             SequenceType.FUNCTION,
                             ExecutionMode.LOCAL,
                             getMetadata()
