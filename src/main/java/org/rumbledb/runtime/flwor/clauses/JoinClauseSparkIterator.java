@@ -25,7 +25,6 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructType;
-import org.rumbledb.config.RumbleRuntimeConfiguration;
 import org.rumbledb.context.DynamicContext;
 import org.rumbledb.context.DynamicContext.VariableDependency;
 import org.rumbledb.context.Name;
@@ -123,7 +122,7 @@ public class JoinClauseSparkIterator extends RuntimeTupleIterator {
             boolean isLeftOuterJoin,
             Name newRightSideVariableName, // really needed?
             ExceptionMetadata metadata,
-            RumbleRuntimeConfiguration conf
+            RuntimeStaticContext staticContext
     ) {
         FlworDataFrame result = tryNativeQueryStatically(
             context,
@@ -209,14 +208,14 @@ public class JoinClauseSparkIterator extends RuntimeTupleIterator {
                     new CommaExpressionIterator(
                             rightTupleSideEqualityCriteria,
                             new RuntimeStaticContext(
-                                    conf,
+                                    staticContext,
                                     SequenceType.ITEM_STAR,
                                     ExecutionMode.LOCAL,
                                     metadata
                             )
                     ),
                     new RuntimeStaticContext(
-                            conf,
+                            staticContext,
                             SequenceType.ITEM_STAR,
                             ExecutionMode.LOCAL,
                             metadata
@@ -230,14 +229,14 @@ public class JoinClauseSparkIterator extends RuntimeTupleIterator {
                     new CommaExpressionIterator(
                             leftTupleSideEqualityCriteria,
                             new RuntimeStaticContext(
-                                    conf,
+                                    staticContext,
                                     SequenceType.ITEM_STAR,
                                     ExecutionMode.LOCAL,
                                     metadata
                             )
                     ),
                     new RuntimeStaticContext(
-                            conf,
+                            staticContext,
                             SequenceType.ITEM_STAR,
                             ExecutionMode.LOCAL,
                             metadata
@@ -256,7 +255,7 @@ public class JoinClauseSparkIterator extends RuntimeTupleIterator {
                 variablesInRightInputTuple,
                 null,
                 true,
-                conf
+                staticContext.getConfiguration()
             );
             leftInputTuple = LetClauseSparkIterator.bindLetVariableInDataFrame(
                 leftInputTuple,
@@ -267,7 +266,7 @@ public class JoinClauseSparkIterator extends RuntimeTupleIterator {
                 variablesInLeftInputTuple,
                 null,
                 true,
-                conf
+                staticContext.getConfiguration()
             );
         }
 

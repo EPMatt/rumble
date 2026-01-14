@@ -120,7 +120,7 @@ public class GetTransformerFunctionIterator extends AtMostOneItemLocalRuntimeIte
                     transformerShortName,
                     transformer,
                     new RuntimeStaticContext(
-                            getConfiguration(),
+                            getRuntimeStaticContext(),
                             SequenceType.OBJECTS,
                             ExecutionMode.DATAFRAME,
                             getMetadata()

@@ -137,7 +137,7 @@ public class FunctionItemCallIterator extends HybridRuntimeIterator {
                         executionMode = ExecutionMode.LOCAL;
                     }
                     RuntimeStaticContext runtimeStaticContext = new RuntimeStaticContext(
-                            getConfiguration(),
+                            getRuntimeStaticContext(),
                             sequenceType,
                             executionMode,
                             this.functionArguments.get(i).getMetadata()
@@ -245,7 +245,12 @@ public class FunctionItemCallIterator extends HybridRuntimeIterator {
         );
         return new ConstantRuntimeIterator(
                 partiallyAppliedFunction,
-                new RuntimeStaticContext(getConfiguration(), SequenceType.FUNCTION, ExecutionMode.LOCAL, getMetadata())
+                new RuntimeStaticContext(
+                        getRuntimeStaticContext(),
+                        SequenceType.FUNCTION,
+                        ExecutionMode.LOCAL,
+                        getMetadata()
+                )
         );
     }
 
