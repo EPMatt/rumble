@@ -72,7 +72,9 @@ import org.rumbledb.expressions.xml.AttributeNodeContentExpression;
 import org.rumbledb.expressions.xml.AttributeNodeExpression;
 import org.rumbledb.expressions.xml.ComputedAttributeConstructorExpression;
 import org.rumbledb.expressions.xml.ComputedElementConstructorExpression;
+import org.rumbledb.expressions.xml.CommentNodeConstructorExpression;
 import org.rumbledb.expressions.xml.DirElemConstructorExpression;
+import org.rumbledb.expressions.xml.DirectCommentConstructorExpression;
 import org.rumbledb.expressions.xml.DocumentNodeConstructorExpression;
 import org.rumbledb.expressions.xml.PostfixLookupExpression;
 import org.rumbledb.expressions.primary.ArrayConstructorExpression;
@@ -1542,6 +1544,14 @@ public class XQueryTranslationVisitor extends XQueryParserBaseVisitor<Node> {
     @Override
     public Node visitDirectConstructor(XQueryParser.DirectConstructorContext ctx) {
         ParseTree child = ctx.children.get(0);
+        if (ctx.COMMENT() != null) {
+            String commentText = ctx.COMMENT().getText();
+            String commentContent = commentText.substring(4, commentText.length() - 3);
+            return new DirectCommentConstructorExpression(
+                    commentContent,
+                    createMetadataFromContext(ctx)
+            );
+        }
         if (child instanceof XQueryParser.DirElemConstructorOpenCloseContext) {
             return this.visitDirElemConstructorOpenClose((XQueryParser.DirElemConstructorOpenCloseContext) child);
         } else if (child instanceof XQueryParser.DirElemConstructorSingleTagContext) {
@@ -1715,6 +1725,8 @@ public class XQueryTranslationVisitor extends XQueryParserBaseVisitor<Node> {
             return this.visitCompElemConstructor((XQueryParser.CompElemConstructorContext) child);
         } else if (child instanceof XQueryParser.CompTextConstructorContext) {
             return this.visitCompTextConstructor((XQueryParser.CompTextConstructorContext) child);
+        } else if (child instanceof XQueryParser.CompCommentConstructorContext) {
+            return this.visitCompCommentConstructor((XQueryParser.CompCommentConstructorContext) child);
         } else if (child instanceof XQueryParser.CompAttrConstructorContext) {
             return this.visitCompAttrConstructor((XQueryParser.CompAttrConstructorContext) child);
         }
@@ -1735,6 +1747,16 @@ public class XQueryTranslationVisitor extends XQueryParserBaseVisitor<Node> {
         Expression contentExpression = (Expression) visit(ctx.enclosedExpression());
 
         return new TextNodeConstructorExpression(
+                contentExpression,
+                createMetadataFromContext(ctx)
+        );
+    }
+
+    @Override
+    public Node visitCompCommentConstructor(XQueryParser.CompCommentConstructorContext ctx) {
+        Expression contentExpression = (Expression) visit(ctx.enclosedExpression());
+
+        return new CommentNodeConstructorExpression(
                 contentExpression,
                 createMetadataFromContext(ctx)
         );
