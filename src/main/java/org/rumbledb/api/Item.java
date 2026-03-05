@@ -1075,7 +1075,6 @@ public interface Item extends Serializable, KryoSerializable {
     }
 
     default List<Item> atomizedValue() {
-        System.err.println(this.serializeAsJSON());
         if (isAtomic())
             return Collections.singletonList(this);
         else
