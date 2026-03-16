@@ -31,6 +31,8 @@ import org.rumbledb.types.ItemType;
 import org.rumbledb.types.ItemTypeFactory;
 import org.rumbledb.types.TypeMappings;
 
+import static org.apache.spark.sql.functions.expr;
+
 import sparksoniq.spark.SparkSessionManager;
 
 import java.sql.Date;
@@ -168,9 +170,7 @@ public class ValidateTypeIterator extends HybridRuntimeIterator {
                     .createDataFrame(rowRDD, schema)
                     .withColumn(
                         SparkSessionManager.nonObjectJSONiqItemColumnName,
-                        org.apache.spark.sql.functions.expr(
-                            "parse_json(`" + SparkSessionManager.nonObjectJSONiqItemColumnName + "`)"
-                        )
+                        expr("parse_json(`" + SparkSessionManager.nonObjectJSONiqItemColumnName + "`)")
                     ),
                 BuiltinTypesCatalogue.item
         );
@@ -295,9 +295,7 @@ public class ValidateTypeIterator extends HybridRuntimeIterator {
         Dataset<Row> dataFrame = SparkSessionManager.getInstance().getOrCreateSession().createDataFrame(rows, schema);
         dataFrame = dataFrame.withColumn(
             SparkSessionManager.nonObjectJSONiqItemColumnName,
-            org.apache.spark.sql.functions.expr(
-                "parse_json(`" + SparkSessionManager.nonObjectJSONiqItemColumnName + "`)"
-            )
+            expr("parse_json(`" + SparkSessionManager.nonObjectJSONiqItemColumnName + "`)")
         );
 
         return new JSoundDataFrame(
