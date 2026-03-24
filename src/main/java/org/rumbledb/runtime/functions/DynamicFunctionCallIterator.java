@@ -36,6 +36,7 @@ import org.rumbledb.items.structured.JSoundDataFrame;
 import org.rumbledb.runtime.HybridRuntimeIterator;
 import org.rumbledb.runtime.RuntimeIterator;
 import org.rumbledb.runtime.functions.arrays.ArrayFunctionCallIterator;
+import org.rumbledb.runtime.functions.maps.MapFunctionCallIterator;
 import org.rumbledb.runtime.typing.AtMostOneItemTypePromotionIterator;
 import org.rumbledb.types.SequenceType;
 
@@ -158,7 +159,7 @@ public class DynamicFunctionCallIterator extends HybridRuntimeIterator {
         }
         if (this.functionItem == null) {
             throw new UnexpectedTypeException(
-                    "Dynamic function calls can only be performed on functions or arrays.",
+                    "Dynamic function calls can only be performed on functions, arrays, or maps.",
                     getMetadata()
             );
         }
@@ -205,9 +206,36 @@ public class DynamicFunctionCallIterator extends HybridRuntimeIterator {
             );
             return;
         }
+        if (this.functionItem.isMap()) {
+            if (this.isPartialApplication) {
+                throw new UnexpectedTypeException(
+                        "Partial application is not supported when calling maps as functions.",
+                        getMetadata()
+                );
+            }
+            if (this.functionArguments.size() != 1 || this.functionArguments.get(0) == null) {
+                throw new UnexpectedTypeException(
+                        "Map function calls must have exactly one argument.",
+                        getMetadata()
+                );
+            }
+            RuntimeIterator keyIterator = this.functionArguments.get(0);
+            RuntimeStaticContext staticContext = new RuntimeStaticContext(
+                    getConfiguration(),
+                    SequenceType.ITEM_STAR,
+                    ExecutionMode.LOCAL,
+                    getMetadata()
+            );
+            this.functionCallIterator = new MapFunctionCallIterator(
+                    this.functionItem,
+                    keyIterator,
+                    staticContext
+            );
+            return;
+        }
         if (!this.functionItem.isFunction()) {
             throw new UnexpectedTypeException(
-                    "Dynamic function calls can only be performed on functions or arrays.",
+                    "Dynamic function calls can only be performed on functions, arrays, or maps.",
                     getMetadata()
             );
         }
