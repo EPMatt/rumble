@@ -31,6 +31,8 @@ import org.rumbledb.exceptions.DefaultCollationException;
 import org.rumbledb.items.ItemFactory;
 import org.rumbledb.runtime.AtMostOneItemLocalRuntimeIterator;
 import org.rumbledb.runtime.RuntimeIterator;
+import org.rumbledb.runtime.misc.AtomicDeepEqual;
+
 import scala.Tuple2;
 
 import java.util.Iterator;
@@ -120,17 +122,6 @@ public class DeepEqualFunctionIterator extends AtMostOneItemLocalRuntimeIterator
      * @return true if the items are deep-equal, false otherwise
      */
     private boolean checkItemsDeepEqual(Item item1, Item item2) {
-        // Specific to deep-equal but does not apply to eq operator
-        // Special handling for NaN values - NaN is deep-equal to NaN
-        if (
-            ((item1.isFloat() && Float.isNaN(item1.getFloatValue()))
-                || (item1.isDouble() && Double.isNaN(item1.getDoubleValue())))
-                && ((item2.isFloat() && Float.isNaN(item2.getFloatValue()))
-                    || (item2.isDouble() && Double.isNaN(item2.getDoubleValue())))
-        ) {
-            return true;
-        }
-
         if (item1.isArray() && item2.isArray()) {
             if (item1.getSize() != item2.getSize()) {
                 return false;
@@ -148,8 +139,7 @@ public class DeepEqualFunctionIterator extends AtMostOneItemLocalRuntimeIterator
             return checkNodesDeepEqual(item1, item2);
         }
 
-        // For non-node items, use the default equals implementation
-        return item1.equals(item2);
+        return AtomicDeepEqual.deepEqual(item1, item2);
     }
 
     /**
