@@ -94,6 +94,7 @@ import org.rumbledb.runtime.functions.numerics.trigonometric.SinFunctionIterator
 import org.rumbledb.runtime.functions.numerics.trigonometric.SinhFunctionIterator;
 import org.rumbledb.runtime.functions.numerics.trigonometric.TanFunctionIterator;
 import org.rumbledb.runtime.functions.maps.MapGetFunctionIterator;
+import org.rumbledb.runtime.functions.maps.MapKeysFunctionIterator;
 import org.rumbledb.runtime.functions.object.ObjectAccumulateFunctionIterator;
 import org.rumbledb.runtime.functions.object.ObjectDescendantFunctionIterator;
 import org.rumbledb.runtime.functions.object.ObjectDescendantPairsFunctionIterator;
@@ -2754,6 +2755,21 @@ public class BuiltinFunctionCatalogue {
         MapGetFunctionIterator.class,
         BuiltinFunction.BuiltinFunctionExecutionMode.LOCAL
     );
+
+    /**
+     * W3C map:keys — F&O 3.1: map:keys($map as map(*)) as xs:anyAtomicType*.
+     */
+    static final BuiltinFunction map_keys = createBuiltinFunction(
+        new Name(
+                Name.MAP_NS,
+                "map",
+                "keys"
+        ),
+        "map",
+        "anyAtomicType*",
+        MapKeysFunctionIterator.class,
+        BuiltinFunction.BuiltinFunctionExecutionMode.LOCAL
+    );
     /**
      * function that returns the JSON null
      */
@@ -3737,6 +3753,7 @@ public class BuiltinFunctionCatalogue {
         builtinFunctions.put(keys.getIdentifier(), keys);
         builtinFunctions.put(members.getIdentifier(), members);
         builtinFunctions.put(map_get.getIdentifier(), map_get);
+        builtinFunctions.put(map_keys.getIdentifier(), map_keys);
         builtinFunctions.put(null_function.getIdentifier(), null_function);
         builtinFunctions.put(size.getIdentifier(), size);
         builtinFunctions.put(array_size.getIdentifier(), array_size);
