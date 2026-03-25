@@ -142,7 +142,7 @@ public class ArrayFoldRightFunctionIterator extends HybridRuntimeIterator {
         if (items.isEmpty()) {
             RuntimeStaticContext staticContext = new RuntimeStaticContext(
                     getConfiguration(),
-                    SequenceType.ITEM_STAR,
+                    SequenceType.createSequenceType("item*"),
                     ExecutionMode.LOCAL,
                     getMetadata()
             );
@@ -153,7 +153,7 @@ public class ArrayFoldRightFunctionIterator extends HybridRuntimeIterator {
         for (Item item : items) {
             RuntimeStaticContext childStaticContext = new RuntimeStaticContext(
                     getConfiguration(),
-                    SequenceType.ITEM_STAR,
+                    SequenceType.createSequenceType("item*"),
                     ExecutionMode.LOCAL,
                     getMetadata()
             );
@@ -162,7 +162,7 @@ public class ArrayFoldRightFunctionIterator extends HybridRuntimeIterator {
 
         RuntimeStaticContext staticContext = new RuntimeStaticContext(
                 getConfiguration(),
-                SequenceType.ITEM_STAR,
+                SequenceType.createSequenceType("item*"),
                 ExecutionMode.LOCAL,
                 getMetadata()
         );

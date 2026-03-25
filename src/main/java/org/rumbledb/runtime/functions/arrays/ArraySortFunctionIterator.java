@@ -120,7 +120,7 @@ public class ArraySortFunctionIterator extends HybridRuntimeIterator {
 
         RuntimeStaticContext sortStaticContext = new RuntimeStaticContext(
                 getConfiguration(),
-                SequenceType.ITEM_STAR,
+                SequenceType.createSequenceType("item*"),
                 ExecutionMode.LOCAL,
                 getMetadata()
         );
@@ -304,7 +304,7 @@ public class ArraySortFunctionIterator extends HybridRuntimeIterator {
     private RuntimeStaticContext localStaticContext() {
         return new RuntimeStaticContext(
                 getConfiguration(),
-                SequenceType.ITEM_STAR,
+                SequenceType.createSequenceType("item*"),
                 ExecutionMode.LOCAL,
                 getMetadata()
         );
