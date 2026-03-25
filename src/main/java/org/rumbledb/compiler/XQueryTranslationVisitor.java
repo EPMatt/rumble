@@ -2007,6 +2007,9 @@ public class XQueryTranslationVisitor extends XQueryParserBaseVisitor<Node> {
     }
 
     public ItemType processItemType(XQueryParser.ItemTypeContext itemTypeContext) {
+        if (itemTypeContext.parenthesizedItemTest() != null) {
+            return processItemType(itemTypeContext.parenthesizedItemTest().itemType());
+        }
         if (itemTypeContext.KW_ITEM() != null) {
             return BuiltinTypesCatalogue.item;
         }
@@ -2035,6 +2038,25 @@ public class XQueryTranslationVisitor extends XQueryParserBaseVisitor<Node> {
             if (typedArrayTestContext != null) {
                 SequenceType contentSequenceType = processSequenceType(typedArrayTestContext.sequenceType());
                 return ArrayItemType.arrayOf(contentSequenceType.getItemType());
+            }
+        }
+        if (itemTypeContext.mapTest() != null) {
+            XQueryParser.MapTestContext mapTestContext = itemTypeContext.mapTest();
+            if (mapTestContext.anyMapTest() != null) {
+                return BuiltinTypesCatalogue.mapItem;
+            }
+            XQueryParser.TypedMapTestContext typedMapTestContext = mapTestContext.typedMapTest();
+            if (typedMapTestContext != null) {
+                Name keyName = parseEqName(typedMapTestContext.eqName(), false, true, false);
+                keyName = ItemTypeReference.renameAtomic(this.configuration, keyName);
+                ItemType keyType;
+                if (!BuiltinTypesCatalogue.typeExists(keyName)) {
+                    keyType = new ItemTypeReference(keyName);
+                } else {
+                    keyType = BuiltinTypesCatalogue.getItemTypeByName(keyName);
+                }
+                SequenceType valueSequenceType = processSequenceType(typedMapTestContext.sequenceType());
+                return ItemTypeFactory.mapOf(keyType, valueSequenceType);
             }
         }
         if (itemTypeContext.eqName() != null) {
