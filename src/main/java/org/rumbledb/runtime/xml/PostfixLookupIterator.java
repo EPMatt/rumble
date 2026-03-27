@@ -141,8 +141,7 @@ public class PostfixLookupIterator extends HybridRuntimeIterator {
                         }
                     }
                 }
-            }
-            if (item.isArray()) {
+            } else if (item.isArray()) {
                 if (this.wildcard) {
                     if (!item.allowsNonSingletons()) {
                         this.nextResult.addAll(item.getItems());
